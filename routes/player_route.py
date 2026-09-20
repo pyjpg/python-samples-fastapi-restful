@@ -21,7 +21,7 @@ Endpoints:
 
 from typing import Annotated, List, Optional
 from uuid import UUID
-from fastapi import APIRouter, Body, Depends, HTTPException, status, Path, Response
+from fastapi import APIRouter, Body, Depends, HTTPException, Query, status, Path, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from aiocache import SimpleMemoryCache
 
@@ -103,6 +103,7 @@ async def get_all_async(
     response: Response,
     async_session: Annotated[AsyncSession, Depends(generate_async_session)],
     specific_team: Optional[str] = None,
+    limit: Annotated[Optional[int], Query(ge=0)] = None,
 ) -> List[PlayerResponseModel]:
     """
     Endpoint to retrieve all players.
@@ -126,6 +127,9 @@ async def get_all_async(
                         if player.team == specific_team:
                             filtered_players.append(player)
                     return filtered_players
+    if limit is not None:
+        if limit >= 0:
+            return players[:limit]
     return players
 
 

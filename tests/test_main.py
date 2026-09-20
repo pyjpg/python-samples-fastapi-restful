@@ -77,6 +77,73 @@ def test_request_get_players_response_status_ok(client):
     # Assert
     assert response.status_code == 200
 
+def test_request_get_players_response_team_match(client):
+    """GET /players/ returns players of the specified team  OK"""
+    # Act
+    response = client.get(f"{PATH}?specific_team=Aston Villa FC")
+    # Assert
+    assert response.status_code == 200
+
+    players = response.json()
+    assert len(players) > 0
+    assert all(player["team"] == "Aston Villa FC" for player in players)
+
+def test_request_get_players_response_team_empty(client):
+    """GET /players/ returns players of the specified team  OK"""
+    # Act
+    response = client.get(f"{PATH}?specific_team=Aston Villaaa FC")
+    # Assert
+    assert response.status_code == 200
+
+    players = response.json()
+    assert players == []
+
+def test_request_get_players_response_team_empty(client):
+    """GET /players/ returns players of the specified team  OK"""
+    # Act
+    response = client.get(f"{PATH}?specific_team=Aston Villaaa FC")
+    # Assert
+    assert response.status_code == 200
+
+    players = response.json()
+    assert players == []
+
+
+def test_request_get_players_response_no_limit(client):
+    """GET /players/ returns player limited"""
+
+    # Act
+    response = client.get(f"{PATH}")
+
+    # Assert
+    assert response.status_code == 200
+
+    players = response.json()
+    assert len(players) > 0
+
+def test_request_get_players_response_limit_4(client):
+    """GET /players/ returns player limited"""
+
+    # Act
+    response = client.get(f"{PATH}?limit=4")
+
+    # Assert
+    assert response.status_code == 200
+
+    players = response.json()
+    assert len(players) <= 4
+
+def test_request_get_players_response_limit_0(client):
+    """GET /players/ returns player limited"""
+
+    # Act
+    response = client.get(f"{PATH}?limit=0")
+
+    # Assert
+    assert response.status_code == 200
+
+    assert response.json() == []
+
 
 def test_request_get_players_response_body_each_player_has_uuid(client):
     """GET /players/ returns players each containing a UUID id field"""
