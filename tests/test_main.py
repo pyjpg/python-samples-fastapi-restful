@@ -144,6 +144,13 @@ def test_request_get_players_response_limit_0(client):
 
     assert response.json() == []
 
+def test_request_get_player_response_negative_limit(client):
+
+    #Act
+    response = client.get(f"{PATH}?limit=-1")
+
+    # Assert
+    assert response.status_code == 422
 
 def test_request_get_players_response_body_each_player_has_uuid(client):
     """GET /players/ returns players each containing a UUID id field"""
