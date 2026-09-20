@@ -19,7 +19,7 @@ Endpoints:
 - DELETE /players/squadnumber/{squad_number} : Delete an existing Player.
 """
 
-from typing import Annotated, List
+from typing import Annotated, List, Optional
 from uuid import UUID
 from fastapi import APIRouter, Body, Depends, HTTPException, status, Path, Response
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -102,6 +102,7 @@ async def post_async(
 async def get_all_async(
     response: Response,
     async_session: Annotated[AsyncSession, Depends(generate_async_session)],
+    specific_team: Optional[str] = None,
 ) -> List[PlayerResponseModel]:
     """
     Endpoint to retrieve all players.
@@ -113,11 +114,18 @@ async def get_all_async(
         List[PlayerResponseModel]: A list of Pydantic models representing all players.
     """
     players = await simple_memory_cache.get(CACHE_KEY)
+    # For a given set of players I want to loop through and return the players whose team matches the team query
     response.headers["X-Cache"] = "HIT"
     if players is None:
         players = await player_service.retrieve_all_async(async_session)
         await simple_memory_cache.set(CACHE_KEY, players, ttl=CACHE_TTL)
         response.headers["X-Cache"] = "MISS"
+    if specific_team is not None:
+                    filtered_players = []
+                    for player in players:
+                        if player.team == specific_team:
+                            filtered_players.append(player)
+                    return filtered_players
     return players
 
 
